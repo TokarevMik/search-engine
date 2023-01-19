@@ -1,8 +1,9 @@
-package searchengine.config;
+package searchengine.model;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import searchengine.model.Page;
 import searchengine.model.Status;
 
 import javax.persistence.*;

@@ -1,4 +1,4 @@
-package searchengine.config;
+package searchengine.model;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -23,9 +23,9 @@ public class Page {
     @Column(columnDefinition = "MEDIUMTEXT",nullable = false)
     private String content;
     @ManyToOne(cascade = {
-            CascadeType.DETACH,
+//            CascadeType.DETACH,
             CascadeType.MERGE,
-            CascadeType.PERSIST
+//            CascadeType.PERSIST
     })
     @JoinColumn(name = "site_id")
     private Site site;

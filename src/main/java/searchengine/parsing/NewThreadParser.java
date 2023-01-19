@@ -4,8 +4,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import searchengine.repositoryes.PageRepo;
 
 public class NewThreadParser implements Runnable {
-    @Autowired
-    private PageRepo pageRepo;
+
+    private final PageRepo pageRepo;
     public NewThreadParser(Node node,PageRepo pageRepo) {
         this.node = node;
         this.pageRepo = pageRepo;

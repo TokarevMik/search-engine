@@ -9,8 +9,8 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Autowired;
-import searchengine.config.Page;
-import searchengine.config.Site;
+import searchengine.model.Page;
+import searchengine.model.Site;
 import searchengine.repositoryes.PageRepo;
 import searchengine.repositoryes.SiteRepo;
 import java.util.Collection;
@@ -39,6 +39,7 @@ public class Node {
         Node.domain = domain;
         this.site = site;
         this.pageRepo = pageRepo;
+        this.siteRepo = siteRepo;
     }
     private Collection<Node> nodes = new HashSet<>();
     public Collection<Node> getChildren() {
@@ -77,7 +78,7 @@ public class Node {
                     nodes.add(new Node(linkHref, domain, site, pageRepo, siteRepo));
                 }
                 if (url.contains(domain)) {
-                    Pattern pattern = Pattern.compile("^(https?://)?/{0,1}([\\w\\.\\-]+/?)*([/\\w\\.\\-])/?$");
+                    Pattern pattern = Pattern.compile("^(https?://)?/{0,1}([\\w\\.\\-]+/?)*([/\\w\\.\\-])*[^(.pdf)]/?$");
                     Matcher matcher = pattern.matcher(linkHref);
                     if (matcher.matches()) {
                         nodes.add(new Node(linkHref, domain, site, pageRepo, siteRepo));

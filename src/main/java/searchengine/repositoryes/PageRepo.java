@@ -2,7 +2,7 @@ package searchengine.repositoryes;
 
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
-import searchengine.config.Page;
+import searchengine.model.Page;
 
 import java.util.List;
 

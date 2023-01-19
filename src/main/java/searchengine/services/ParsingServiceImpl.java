@@ -3,7 +3,7 @@ package searchengine.services;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import searchengine.config.Site;
+import searchengine.model.Site;
 import searchengine.config.SitesList;
 import searchengine.model.Status;
 import searchengine.parsing.NewThreadParser;

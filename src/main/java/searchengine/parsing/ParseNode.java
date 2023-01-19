@@ -23,13 +23,11 @@ public class ParseNode extends RecursiveAction {
     }
     @Override
     protected void compute() {
-//        String url = node.getUrl(); //текущий адрес
         node.getParseNode();
-
         Set<ParseNode> taskList = new CopyOnWriteArraySet<>();
 
         for (Node child : node.getChildren()) {
-            if (pageRepo.findDistinctByPath(node.getUrl()).isEmpty()) {
+            if (pageRepo.findDistinctByPath(child.getUrl()).isEmpty()) {
                 ParseNode parseNodeTask = new ParseNode(child,pageRepo);
                 parseNodeTask.fork();
                 try {
