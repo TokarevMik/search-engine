@@ -78,7 +78,7 @@ public class Node {
                     nodes.add(new Node(linkHref, domain, site, pageRepo, siteRepo));
                 }
                 if (url.contains(domain)) {
-                    Pattern pattern = Pattern.compile("^(https?://)?/{0,1}([\\w\\.\\-]+/?)*([/\\w\\.\\-])*[^(.pdf)]/?$");
+                    Pattern pattern = Pattern.compile("^(https?://)?/{0,1}([\\w\\.\\-&&[^@]]+/?)*([/\\w\\.\\-&&[^@]])*[^(.pdf)]/?$");
                     Matcher matcher = pattern.matcher(linkHref);
                     if (matcher.matches()) {
                         nodes.add(new Node(linkHref, domain, site, pageRepo, siteRepo));
