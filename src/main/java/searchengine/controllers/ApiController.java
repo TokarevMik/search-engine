@@ -26,6 +26,12 @@ public class ApiController {
     }
     @GetMapping("/startIndexing")
     public void StartSearching(){
+
+        parsingService.startParsing();
+    }
+    @GetMapping("/stopIndexing")
+    public void StopSearching(){
+
         parsingService.startParsing();
     }
 }

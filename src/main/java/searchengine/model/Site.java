@@ -3,8 +3,6 @@ package searchengine.model;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import searchengine.model.Page;
-import searchengine.model.Status;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -34,12 +32,12 @@ public class Site {
     @OneToMany(mappedBy = "site",cascade = CascadeType.ALL)
     List<Page> listPages;
     public void setListPages(List<Page> listPages) {
-//        if(listPages!=null){
-//            listPages.forEach(a->a.setSite(this));
-//        }
-//        this.listPages = listPages;
+        if(listPages!=null){
+            listPages.forEach(a->a.setSite(this));
+        }
         this.listPages = listPages;
-        listPages.forEach(p -> p.setSite(this));
+        /*this.listPages = listPages;
+        listPages.forEach(p -> p.setSite(this));*/
     }
 
 }

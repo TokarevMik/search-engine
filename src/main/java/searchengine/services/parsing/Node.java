@@ -61,15 +61,15 @@ public class Node {
             Element content = doc.body();
             bodyText = content.text(); //
             page.setContent(contentOfPage);
-            Elements links = content.getElementsByTag("a");
+//            Elements links = content.getElementsByTag("a");
+            Elements links = content.select("a[href]");
             if (url.equals(domain)) {
-                path = domain; //если адрес совпадает с доменом - то путь равен домену
+                path = domain;
             } else {
                 if (url.contains(domain)) {
-                    path = url.replace(domain, ""); // если адресне не совпадает с доменом но содержит его  - то домен удаляется идет запись
+                    path = url.replace(domain, "");
                 }
             }
-            //следовательно url всегда должен содержать домен в том или ином видеи не может быть пустым
             page.setPath(path);
             page.setSite(site);
             try {
@@ -81,14 +81,14 @@ public class Node {
                 System.out.println(page.getSite().getUrl());
             }
             for (Element link : links) {
-                    String linkHref = link.attr("href");
+                    String linkHref = link.attr("abs:href");
                 if(!linkHref.contains("tel:")&&!linkHref.contains("callto:")) {
                     if (!linkHref.contains("http")&&!linkHref.contains("https")) {
                         linkHref = domain.concat(linkHref);
                         nodes.add(new Node(linkHref, domain, site, pageRepo, siteRepo));
                     }
                     if (linkHref.contains(domain)) {
-                        Pattern pattern = Pattern.compile("^(https?://)?/{0,1}([\\w\\.\\-&&[^@]]+/?)*([/\\w\\.\\-&&[^@]])*[^(.pdf)]/?$");
+                        Pattern pattern = Pattern.compile("^(https?://)?/{0,1}([\\w\\.\\-&&[^@]]+/?)*([/\\w\\.\\-&&[^@]])*[^(.pdf),^(.jpg)]/?$");
                         Matcher matcher = pattern.matcher(linkHref);
                         if (matcher.matches()) {
                             nodes.add(new Node(linkHref, domain, site, pageRepo, siteRepo));

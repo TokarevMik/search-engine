@@ -24,7 +24,12 @@ public class ParseNode extends RecursiveAction {
     public static Set<String> isAlreadyAdded = new CopyOnWriteArraySet<>();  // url already in DB (????)
     @Override
     protected void compute() {
-        node.getParseNode();
+        try {
+            node.getParseNode();
+        }
+        catch (IllegalArgumentException e){
+            e.printStackTrace();
+        }
         Set<ParseNode> taskList = new CopyOnWriteArraySet<>();
 
         for (Node child : node.getChildren()) {
