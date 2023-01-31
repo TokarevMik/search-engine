@@ -1,4 +1,4 @@
-package searchengine.parsing;
+package searchengine.services.parsing;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -9,6 +9,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import searchengine.model.Page;
 import searchengine.model.Site;
 import searchengine.repositoryes.PageRepo;
@@ -62,26 +63,36 @@ public class Node {
             page.setContent(contentOfPage);
             Elements links = content.getElementsByTag("a");
             if (url.equals(domain)) {
-                path = domain;
+                path = domain; //если адрес совпадает с доменом - то путь равен домену
             } else {
                 if (url.contains(domain)) {
-                    path = url.replace(domain, "");
+                    path = url.replace(domain, ""); // если адресне не совпадает с доменом но содержит его  - то домен удаляется идет запись
                 }
             }
+            //следовательно url всегда должен содержать домен в том или ином видеи не может быть пустым
             page.setPath(path);
             page.setSite(site);
-            pageRepo.save(page);
+            try {
+                pageRepo.save(page);
+            } catch (DataIntegrityViolationException ex){
+                ex.printStackTrace();
+                System.out.println(page.getPath());
+                System.out.println(url + "**");
+                System.out.println(page.getSite().getUrl());
+            }
             for (Element link : links) {
-                String linkHref = link.attr("href");
-                if (!linkHref.contains("http")) {
-                    linkHref = domain.concat(linkHref);
-                    nodes.add(new Node(linkHref, domain, site, pageRepo, siteRepo));
-                }
-                if (url.contains(domain)) {
-                    Pattern pattern = Pattern.compile("^(https?://)?/{0,1}([\\w\\.\\-&&[^@]]+/?)*([/\\w\\.\\-&&[^@]])*[^(.pdf)]/?$");
-                    Matcher matcher = pattern.matcher(linkHref);
-                    if (matcher.matches()) {
+                    String linkHref = link.attr("href");
+                if(!linkHref.contains("tel:")&&!linkHref.contains("callto:")) {
+                    if (!linkHref.contains("http")&&!linkHref.contains("https")) {
+                        linkHref = domain.concat(linkHref);
                         nodes.add(new Node(linkHref, domain, site, pageRepo, siteRepo));
+                    }
+                    if (linkHref.contains(domain)) {
+                        Pattern pattern = Pattern.compile("^(https?://)?/{0,1}([\\w\\.\\-&&[^@]]+/?)*([/\\w\\.\\-&&[^@]])*[^(.pdf)]/?$");
+                        Matcher matcher = pattern.matcher(linkHref);
+                        if (matcher.matches()) {
+                            nodes.add(new Node(linkHref, domain, site, pageRepo, siteRepo));
+                        }
                     }
                 }
             }

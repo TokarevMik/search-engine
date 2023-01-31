@@ -1,6 +1,5 @@
-package searchengine.parsing;
+package searchengine.services.parsing;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import searchengine.repositoryes.PageRepo;
 
 public class NewThreadParser implements Runnable {

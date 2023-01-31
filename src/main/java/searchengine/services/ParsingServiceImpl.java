@@ -6,8 +6,8 @@ import org.springframework.stereotype.Service;
 import searchengine.model.Site;
 import searchengine.config.SitesList;
 import searchengine.model.Status;
-import searchengine.parsing.NewThreadParser;
-import searchengine.parsing.Node;
+import searchengine.services.parsing.NewThreadParser;
+import searchengine.services.parsing.Node;
 import searchengine.repositoryes.PageRepo;
 import searchengine.repositoryes.SiteRepo;
 

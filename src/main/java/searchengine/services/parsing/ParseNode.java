@@ -1,4 +1,4 @@
-package searchengine.parsing;
+package searchengine.services.parsing;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -21,13 +21,15 @@ public class ParseNode extends RecursiveAction {
         this.node = node;
         this.pageRepo = pageRepo;
     }
+    public static Set<String> isAlreadyAdded = new CopyOnWriteArraySet<>();  // url already in DB (????)
     @Override
     protected void compute() {
         node.getParseNode();
         Set<ParseNode> taskList = new CopyOnWriteArraySet<>();
 
         for (Node child : node.getChildren()) {
-            if (pageRepo.findDistinctByPath(child.getUrl()).isEmpty()) {
+            if (!isAlreadyAdded.contains(child.getUrl())) {
+                isAlreadyAdded.add(child.getUrl());
                 ParseNode parseNodeTask = new ParseNode(child,pageRepo);
                 parseNodeTask.fork();
                 try {
