@@ -23,6 +23,7 @@ spring:
       #        globally_quoted_identifiers: 'false'
       dialect: org.hibernate.dialect.MySQL8Dialect
     hibernate:
-      ddl-auto: update
+      ddl-auto: create
+#      ddl-auto: update
     show-sql: true
 ...

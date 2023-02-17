@@ -22,11 +22,6 @@ public class Page {
     private int code;
     @Column(columnDefinition = "MEDIUMTEXT",nullable = false)
     private String content;
-/*    @ManyToOne(cascade = {
-//            CascadeType.DETACH,
-            CascadeType.MERGE,
-//            CascadeType.PERSIST
-    })*/
     @ManyToOne(optional = false)
     @JoinColumn(name = "site_id")
     private Site site;

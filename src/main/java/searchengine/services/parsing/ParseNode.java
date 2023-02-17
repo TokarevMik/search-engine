@@ -21,7 +21,6 @@ public class ParseNode extends RecursiveAction {
         this.node = node;
         this.pageRepo = pageRepo;
     }
-    public static Set<String> isAlreadyAdded = new CopyOnWriteArraySet<>();  // url already in DB (????)
     @Override
     protected void compute() {
         try {
@@ -33,8 +32,7 @@ public class ParseNode extends RecursiveAction {
         Set<ParseNode> taskList = new CopyOnWriteArraySet<>();
 
         for (Node child : node.getChildren()) {
-            if (!isAlreadyAdded.contains(child.getUrl())) {
-                isAlreadyAdded.add(child.getUrl());
+                if (pageRepo.findDistinctByPath(child.getPath()).isEmpty()) {
                 ParseNode parseNodeTask = new ParseNode(child,pageRepo);
                 parseNodeTask.fork();
                 try {
@@ -55,4 +53,3 @@ public class ParseNode extends RecursiveAction {
     }
 
 }
-

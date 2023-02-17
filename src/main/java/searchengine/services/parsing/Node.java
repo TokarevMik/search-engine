@@ -9,11 +9,13 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.transaction.annotation.Transactional;
 import searchengine.model.Page;
 import searchengine.model.Site;
 import searchengine.repositoryes.PageRepo;
 import searchengine.repositoryes.SiteRepo;
+
+import java.net.UnknownHostException;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.regex.Matcher;
@@ -31,21 +33,26 @@ public class Node {
     String bodyText = "";
     private Integer statusCode;
     private String contentOfPage = "";
+
     public Node(String url) {
         this.url = url;
     }
+
     @Autowired
-    public Node(String url, String domain, Site site,PageRepo pageRepo,SiteRepo siteRepo) {
+    public Node(String url, String domain, Site site, PageRepo pageRepo, SiteRepo siteRepo) {
         this.url = url;
         Node.domain = domain;
         this.site = site;
         this.pageRepo = pageRepo;
         this.siteRepo = siteRepo;
     }
+
     private Collection<Node> nodes = new HashSet<>();
+
     public Collection<Node> getChildren() {
         return nodes;
     }
+
     public void getParseNode() {
         try {
             Thread.sleep(200);
@@ -53,7 +60,7 @@ public class Node {
                             ("Mozilla/5.0 (Windows; U; WindowsNT 5.1; en-US; rv1.8.1.6)" +
                                     " Gecko/20070725 Firefox/2.0.0.6")
                     .referrer("http://www.google.com").maxBodySize(0).execute();
-            Page page= new Page();
+            Page page = new Page();
             statusCode = response.statusCode();
             page.setCode(statusCode);
             Document doc = response.parse();
@@ -72,18 +79,12 @@ public class Node {
             }
             page.setPath(path);
             page.setSite(site);
-            try {
-                pageRepo.save(page);
-            } catch (DataIntegrityViolationException ex){
-                ex.printStackTrace();
-                System.out.println(page.getPath());
-                System.out.println(url + "**");
-                System.out.println(page.getSite().getUrl());
-            }
+            savePage(page);
             for (Element link : links) {
-                    String linkHref = link.attr("abs:href");
-                if(!linkHref.contains("tel:")&&!linkHref.contains("callto:")) {
-                    if (!linkHref.contains("http")&&!linkHref.contains("https")) {
+                String linkHref = link.attr("abs:href");
+                if (!linkHref.contains("tel:") && !linkHref.contains("callto:")) {
+                    if (!linkHref.contains("http")) {
+//                    if (!linkHref.contains("http")&&!linkHref.contains("https")) {
                         linkHref = domain.concat(linkHref);
                         nodes.add(new Node(linkHref, domain, site, pageRepo, siteRepo));
                     }
@@ -96,12 +97,22 @@ public class Node {
                     }
                 }
             }
-        } catch (HttpStatusException se) {
+        }
+        catch (HttpStatusException se) {
             path = url.replace(domain, "");
             contentOfPage = "";
             statusCode = se.getStatusCode();
-        } catch (Exception e) {
+        }
+        catch (UnknownHostException ignored) {}
+        catch (IllegalArgumentException ignored){}
+        catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+    @Transactional
+    private void savePage(Page p){
+        if (pageRepo.findDistinctByPath(p.getPath()).isEmpty()){
+            pageRepo.save(p);
         }
     }
 }
