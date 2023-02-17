@@ -42,7 +42,7 @@ public class ApiController {
     @GetMapping("/stopIndexing")
     public Map<String,String> StopSearching(){
         Map<String,String> response= new HashMap<>();
-        if(!parsingService.isStarted()){
+        if(parsingService.isStarted()){
             parsingService.stopParsing();
             response.put("result","true");
         }else {

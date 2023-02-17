@@ -53,6 +53,7 @@ public class ParsingServiceImpl implements ParsingService {
     public void stopParsing(){
         for(NewThreadParser p:parserList){
             p.shutdown();
+
         }
     }
 
