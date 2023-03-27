@@ -10,11 +10,16 @@ import javax.persistence.*;
 @Getter
 @Setter
 @NoArgsConstructor
-@Table
+@Table(name = "index")
 public class Index {
     @Id
     @Column(nullable = false)
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
-
+    @Column(nullable = false)
+    private int page_id;
+    @Column(nullable = false)
+    private int lemma_id;
+    @Column(nullable = false)
+    private float rank;
 }

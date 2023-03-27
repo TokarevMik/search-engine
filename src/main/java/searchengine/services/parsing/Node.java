@@ -24,6 +24,7 @@ import java.util.regex.Pattern;
 @Getter
 @Setter
 public class Node {
+    static volatile boolean isCanceled = false;
     private PageRepo pageRepo;
     private SiteRepo siteRepo;
     private String url;

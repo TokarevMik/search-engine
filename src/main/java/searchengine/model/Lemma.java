@@ -1,28 +1,20 @@
 package searchengine.model;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-
 import javax.persistence.*;
+import java.awt.print.Book;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
-@Entity
-@Getter
-@Setter
-@NoArgsConstructor
-@Table
 public class Lemma {
     @Id
     @Column(nullable = false)
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
-
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "site_id")
-    private Site site;
-    @Column(nullable = false,length = 255)
-    String lemma;
-    @Column(nullable = false)
-    int frequency;
-
+    @JoinTable(name = "index",
+            joinColumns = @JoinColumn(name = "lemma_id"),
+            inverseJoinColumns = @JoinColumn(name = "page_id")
+    )
+    private Set<Book> pages=new HashSet<>();
 }
