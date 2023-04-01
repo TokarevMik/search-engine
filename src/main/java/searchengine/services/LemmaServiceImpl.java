@@ -1,17 +1,22 @@
 package searchengine.services;
 
+import lombok.RequiredArgsConstructor;
 import org.apache.lucene.morphology.LuceneMorphology;
+import org.apache.lucene.morphology.WrongCharaterException;
 import org.apache.lucene.morphology.english.EnglishLuceneMorphology;
 import org.apache.lucene.morphology.russian.RussianLuceneMorphology;
+import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Service
+@RequiredArgsConstructor
 public class LemmaServiceImpl implements LemmaService {
     @Override
-    public Map<String, Integer> LemmaMap(String s) throws IOException {
+    public Map<String, Double> LemmaMap(String s) throws IOException {
         Map<String, Double> countMap = new HashMap<>();
         LuceneMorphology russianLuceneMorphology = new RussianLuceneMorphology();
         LuceneMorphology englishLuceneMorphology = new EnglishLuceneMorphology();
@@ -44,9 +49,8 @@ public class LemmaServiceImpl implements LemmaService {
                 }
             }
         }
-        return null;
+        return countMap;
     }
-
     public static boolean isNotSpecial(String s) throws IOException {
         LuceneMorphology luceneMorphology = new RussianLuceneMorphology();
         List<String> wordBaseForms = luceneMorphology.getMorphInfo(s);
