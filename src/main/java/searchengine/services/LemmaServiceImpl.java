@@ -16,8 +16,8 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class LemmaServiceImpl implements LemmaService {
     @Override
-    public Map<String, Double> LemmaMap(String s) throws IOException {
-        Map<String, Double> countMap = new HashMap<>();
+    public Map<String, Integer> LemmaMap(String s) throws IOException {
+        Map<String, Integer> countMap = new HashMap<>();
         LuceneMorphology russianLuceneMorphology = new RussianLuceneMorphology();
         LuceneMorphology englishLuceneMorphology = new EnglishLuceneMorphology();
         String[] words = stringSplitter(s);
@@ -28,9 +28,9 @@ public class LemmaServiceImpl implements LemmaService {
                     wordBaseForms = russianLuceneMorphology.getNormalForms(st);
                     for (String bf : wordBaseForms) {
                         if (isNotSpecial(bf)) {
-                            Double c = countMap.get(bf);
+                            Integer c = countMap.get(bf);
                             if (c == null) {
-                                countMap.put(bf, 1.0);
+                                countMap.put(bf, 1);
                             } else {
                                 countMap.put(bf, ++c);
                             }
@@ -39,9 +39,9 @@ public class LemmaServiceImpl implements LemmaService {
                 } else {
                     wordBaseForms = englishLuceneMorphology.getNormalForms(st);
                     for (String bf : wordBaseForms) {
-                        Double c = countMap.get(bf);
+                        Integer c = countMap.get(bf);
                         if (c == null) {
-                            countMap.put(bf, 1.0);
+                            countMap.put(bf, 1);
                         } else {
                             countMap.put(bf, ++c);
                         }

@@ -25,7 +25,7 @@ public class Lemmitazer {
     }
     static void printWords(String s) throws IOException {
         LemmaService lemmaService = new LemmaServiceImpl();
-       Map<String,Double> sm =  lemmaService.LemmaMap(s);
+       Map<String,Integer> sm =  lemmaService.LemmaMap(s);
        sm.forEach((s1, aDouble) -> System.out.println(s1 + " " + aDouble));
     }
 

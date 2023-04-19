@@ -1,10 +1,8 @@
 package searchengine.controllers;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import searchengine.dto.statistics.PageIndResponse;
 import searchengine.dto.statistics.StatisticsResponse;
 import searchengine.services.ParsingServiceImpl;
 import searchengine.services.StatisticsService;
@@ -28,27 +26,35 @@ public class ApiController {
     public ResponseEntity<StatisticsResponse> statistics() {
         return ResponseEntity.ok(statisticsService.getStatistics());
     }
+
     @GetMapping("/startIndexing")
-    public Map<String,String> StartSearching(){
-        Map<String,String> response= new HashMap<>();
-        if(parsingService.startParsing()){
-            response.put("result","true");
+    public Map<String, String> StartSearching() {
+        Map<String, String> response = new HashMap<>();
+        if (!parsingService.isStarted()) {
+            parsingService.startParsing();
+            response.put("result", "true");
         } else {
-            response.put("result","false");
-            response.put("error","Индексация уже запущена");
-        };
+            response.put("result", "false");
+            response.put("error", "Индексация уже запущена");
+        } ;
         return response;
     }
+
     @GetMapping("/stopIndexing")
-    public Map<String,String> StopSearching(){
-        Map<String,String> response= new HashMap<>();
-        if(parsingService.isStarted()){
+    public Map<String, String> StopSearching() {
+        Map<String, String> response = new HashMap<>();
+        if (parsingService.isShutdown()) {
+            response.put("result", "true");
             parsingService.stopParsing();
-            response.put("result","true");
-        }else {
-            response.put("result","false");
-            response.put("error","Индексация не запущена");
+        } else {
+            response.put("result", "false");
+            response.put("error", "Индексация не запущена");
         }
         return response;
+    }
+
+    @PostMapping("/api/indexPage")
+    public ResponseEntity<PageIndResponse> indexingPage() {
+        return null; //TO DO
     }
 }
