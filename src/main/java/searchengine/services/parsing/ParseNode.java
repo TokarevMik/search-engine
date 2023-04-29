@@ -7,6 +7,8 @@ import searchengine.repositoryes.PageRepo;
 
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.ForkJoinTask;
 import java.util.concurrent.RecursiveAction;
 @Getter
 @Setter
@@ -23,33 +25,39 @@ public class ParseNode extends RecursiveAction {
     }
     @Override
     protected void compute() {
-        try {
-            node.getParseNode();
-        }
-        catch (IllegalArgumentException e){
-            e.printStackTrace();
-        }
-        Set<ParseNode> taskList = new CopyOnWriteArraySet<>();
-
-        for (Node child : node.getChildren()) {
-                if (pageRepo.findDistinctByPath(child.getPath()).isEmpty()) {
-                ParseNode parseNodeTask = new ParseNode(child,pageRepo);
-                parseNodeTask.fork();
-                try {
-                    Thread.sleep(300);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                taskList.add(parseNodeTask);
+        if (StopParsing.getStop()) {
+            ForkJoinPool pool = ForkJoinTask.getPool();
+            if (pool != null) {
+                pool.shutdownNow();
             }
-        }
-        for (ParseNode task : taskList) {
+        } else {
             try {
-                task.join();
-            } catch (Exception e) {
+                node.getParseNode();
+            } catch (IllegalArgumentException e) {
                 e.printStackTrace();
             }
+            Set<ParseNode> taskList = new CopyOnWriteArraySet<>();
+
+            for (Node child : node.getChildren()) {
+                if (pageRepo.findDistinctByPath(child.getPath()).isEmpty()) {
+                    ParseNode parseNodeTask = new ParseNode(child, pageRepo);
+                    parseNodeTask.fork();
+                    try {
+                        Thread.sleep(300);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    taskList.add(parseNodeTask);
+                }
+            }
+            for (ParseNode task : taskList) {
+                try {
+                    task.join();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
         }
-    }
+    } //end of compute
 
 }

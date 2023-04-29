@@ -31,7 +31,7 @@ public class NewThreadParser implements Runnable {
     public boolean isShutdown() {
         return pool.isShutdown();
     }
-//    public void stop(){
+/*//    public void stop(){
 //        isRunning = false;
-//    }
+//    }*/
 }

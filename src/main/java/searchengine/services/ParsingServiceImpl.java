@@ -12,6 +12,7 @@ import searchengine.services.parsing.NewThreadParser;
 import searchengine.services.parsing.Node;
 import searchengine.repositoryes.PageRepo;
 import searchengine.repositoryes.SiteRepo;
+import searchengine.services.parsing.StopParsing;
 
 import java.util.Date;
 import java.util.LinkedList;
@@ -20,7 +21,7 @@ import java.util.LinkedList;
 @Getter
 @RequiredArgsConstructor
 public class ParsingServiceImpl implements ParsingService {
-    private boolean isStarted = false;
+    private static boolean isStarted = false;
     @Autowired
     SiteRepo siteRepo;
     //    IndexingStatus status;
@@ -36,6 +37,7 @@ public class ParsingServiceImpl implements ParsingService {
         siteRepo.deleteAll();
         pageRepo.deleteAll();
         for (Site site : sites.getSites()) {
+            StopParsing.implNewStop();
             site.setStatus_time(new Date());
             site.setStatus(Status.INDEXING);
             siteRepo.save(site);
@@ -49,8 +51,8 @@ public class ParsingServiceImpl implements ParsingService {
 
     public void stopParsing() {
         for (NewThreadParser p : parserList) {
-            p.shutdown();
-
+            StopParsing.stop();
+            p.shutdown();//проверить убрать
         }
     }
 
@@ -58,7 +60,7 @@ public class ParsingServiceImpl implements ParsingService {
         return isStarted;
     }
 
-    public boolean isShutdown() {
+    public boolean isNotShutdown() {
         for (NewThreadParser p : parserList) {
             if (!p.isShutdown()) return true;
         }
