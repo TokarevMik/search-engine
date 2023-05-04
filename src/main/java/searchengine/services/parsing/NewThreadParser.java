@@ -3,8 +3,10 @@ package searchengine.services.parsing;
 import searchengine.repositoryes.PageRepo;
 
 import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class NewThreadParser implements Runnable {
+    private final AtomicBoolean isRunning = new AtomicBoolean(false);
 
     private final PageRepo pageRepo;
 
@@ -18,13 +20,15 @@ public class NewThreadParser implements Runnable {
 
     @Override
     public void run() {
-//        while (isRunning) {
-                ParseNode task = new ParseNode(node, pageRepo);
-                pool.invoke(task);
+        isRunning.set(true);
+        while (isRunning.get()) {
+            ParseNode task = new ParseNode(node, pageRepo);
+            pool.invoke(task);
+        }
         }
 
-    public void shutdown() {
-//        isRunning = false;
+    public void interrupt() {
+        isRunning.set(false);
         pool.shutdownNow();
     }
 

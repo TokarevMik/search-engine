@@ -29,6 +29,7 @@ public class ParsingServiceImpl implements ParsingService {
     PageRepo pageRepo;
     private final SitesList sites;
     private LinkedList<NewThreadParser> parserList = new LinkedList<>();
+    private LinkedList<Thread> threadsList = new LinkedList<>();
 
     @Override
     @Async
@@ -41,8 +42,8 @@ public class ParsingServiceImpl implements ParsingService {
             site.setStatus_time(new Date());
             site.setStatus(Status.INDEXING);
             siteRepo.save(site);
-            parserList.add(new NewThreadParser(new Node(site.getUrl(), site.getUrl(), site, pageRepo, siteRepo), pageRepo));
-            parserList.getLast().run();
+            threadsList.add(new Thread(new NewThreadParser(new Node(site.getUrl(), site.getUrl(), site, pageRepo, siteRepo), pageRepo)));
+            threadsList.getLast().start(); //запуск каждого нового потока после добавления в список
             site.setStatus_time(new Date());
             site.setStatus(Status.INDEXED);
             siteRepo.changeStatus(site.getId(), site.getStatus(), site.getStatus_time()); //Parameter value [1] did not match expected type Parameter value [2] did not match expected type
@@ -50,12 +51,11 @@ public class ParsingServiceImpl implements ParsingService {
     }
 
     public void stopParsing() {
-        for (NewThreadParser p : parserList) {
+        for (Thread p : threadsList) {
             StopParsing.stop();
-            p.shutdown();//проверить убрать
+            p.interrupt();//проверить убрать
         }
     }
-
     public boolean isStarted() {
         return isStarted;
     }
