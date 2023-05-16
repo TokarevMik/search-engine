@@ -23,7 +23,8 @@ public class NewThreadParser implements Runnable {
         isRunning.set(true);
         while (isRunning.get()) {
             ParseNode task = new ParseNode(node, pageRepo);
-            pool.invoke(task);
+//            pool.invoke(task);
+            pool.execute(task);
         }
         }
 

@@ -55,8 +55,8 @@ public class ApiController {
     }
 
     @PostMapping("/api/indexPage")
-    public ResponseEntity<PageIndResponse> indexingPage() {
-
+    public ResponseEntity<PageIndResponse> indexingPage(@RequestBody String page) {
+        System.out.println(page);
         return null; //TO DO
     }
     @GetMapping("/api/search")
