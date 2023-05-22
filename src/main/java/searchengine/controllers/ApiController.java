@@ -1,10 +1,12 @@
 package searchengine.controllers;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import searchengine.dto.statistics.PageIndResponse;
 import searchengine.dto.statistics.SearchResponse;
 import searchengine.dto.statistics.StatisticsResponse;
+import searchengine.services.IndexServiceImpl;
 import searchengine.services.ParsingServiceImpl;
 import searchengine.services.StatisticsService;
 
@@ -17,10 +19,12 @@ public class ApiController {
 
     private final StatisticsService statisticsService;
     private final ParsingServiceImpl parsingService;
+    private final IndexServiceImpl indexService ;
 
-    public ApiController(StatisticsService statisticsService, ParsingServiceImpl parsingService) {
+    public ApiController(StatisticsService statisticsService, ParsingServiceImpl parsingService, IndexServiceImpl indexService) {
         this.statisticsService = statisticsService;
         this.parsingService = parsingService;
+        this.indexService = indexService;
     }
 
     @GetMapping("/statistics")
@@ -37,7 +41,8 @@ public class ApiController {
         } else {
             response.put("result", "false");
             response.put("error", "Индексация уже запущена");
-        } ;
+        }
+        ;
         return response;
     }
 
@@ -54,12 +59,13 @@ public class ApiController {
         return response;
     }
 
-    @PostMapping("/api/indexPage")
-    public ResponseEntity<PageIndResponse> indexingPage(@RequestBody String page) {
-        System.out.println(page);
-        return null; //TO DO
+    @PostMapping("/indexPage")
+    public ResponseEntity<PageIndResponse> indexingPage(@RequestParam(name = "page", required = false) String page) {
+            PageIndResponse pageIndResponse = indexService.processIndex(page);
+        return new ResponseEntity<>(pageIndResponse, HttpStatus.OK);
     }
-    @GetMapping("/api/search")
+
+    @GetMapping("/search")
     public ResponseEntity<SearchResponse> search(String query, String site) {
 
         return null; //TO DO

@@ -5,8 +5,8 @@ indexing-settings:
 #      name: Лента.ру
 #    - url: https://www.skillbox.ru
 #      name: Skillbox
-#    - url: https://www.playback.ru
-#      name: PlayBack.Ru
+    - url: https://www.playback.ru
+      name: PlayBack.Ru
     - url: https://dimonvideo.ru
       name: Dimonvideo.Ru
 server:
@@ -23,7 +23,7 @@ spring:
       #        globally_quoted_identifiers: 'false'
       dialect: org.hibernate.dialect.MySQL8Dialect
     hibernate:
-      ddl-auto: create
-#      ddl-auto: update
+#      ddl-auto: create
+      ddl-auto: update
     show-sql: true
 ...
