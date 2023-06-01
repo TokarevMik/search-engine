@@ -8,7 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import searchengine.model.Lemma;
 
 @Repository
-public interface LemmaRepository extends JpaRepository<Lemma, Integer> {
+public interface LemmaRepo extends JpaRepository<Lemma, Integer> {
     @Modifying
     @Transactional
     @Query(value = "CREATE TABLE IF NOT EXISTS lemma " +

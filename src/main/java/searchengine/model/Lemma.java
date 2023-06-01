@@ -1,6 +1,6 @@
 package searchengine.model;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.awt.print.Book;
 import java.util.ArrayList;
 import java.util.HashSet;

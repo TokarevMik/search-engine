@@ -16,8 +16,10 @@ public interface SiteRepo extends JpaRepository<Site,Integer> {
     @Override
     void deleteAll();
     @Modifying
-    @Query("UPDATE Site s SET s.status = :status, s.status_time = :status_time  WHERE s.id = :id")
-    void changeStatus(long id, Status status, Date status_time);
+    @Query("UPDATE Site s SET s.status = :status, s.status_time = :status_time, last_error = ?4  WHERE s.url = :url")
+    void changeStatus(String url, Status status, Date status_time, String last_error);
+//@Query(value = "UPDATE site SET last_error = ?2 WHERE url = ?1", nativeQuery = true)
+
 
     @Modifying
     @Transactional

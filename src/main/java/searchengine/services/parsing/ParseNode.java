@@ -3,8 +3,10 @@ package searchengine.services.parsing;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
+import searchengine.dto.statistics.AnchorStop;
 import searchengine.repositoryes.PageRepo;
 
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.ForkJoinPool;
@@ -23,9 +25,12 @@ public class ParseNode extends RecursiveAction {
         this.node = node;
         this.pageRepo = pageRepo;
     }
+    public ParseNode(List<ParseNode>parseNodeList){
+
+    }//прописать
     @Override
     protected void compute() {
-        if (StopParsing.getStop()) {
+        if (AnchorStop.getStop()) {
             ForkJoinPool pool = ForkJoinTask.getPool();
             if (pool != null) {
                 pool.shutdownNow();
