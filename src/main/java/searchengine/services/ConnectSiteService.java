@@ -14,15 +14,15 @@ public class ConnectSiteService {
     Connection.Response response;
 
 
-    public Connection.Response getResponse() throws IOException {
+    public Connection.Response getResponse(){
         try{response = Jsoup.connect(url).timeout(0).userAgent
                         ("Mozilla/5.0 (Windows; U; WindowsNT 5.1; en-US; rv1.8.1.6)" +
                                 " Gecko/20070725 Firefox/2.0.0.6")
                 .referrer("http://www.google.com").maxBodySize(0).execute();}
         catch (HttpStatusException httpEx){
-            responseStatus = response.statusCode();
+            responseStatus = response.statusCode(); //переделать
         } catch (IOException ex){
-            response.statusCode();
+            response.statusCode(); //переделать
         }
         return response;
     }

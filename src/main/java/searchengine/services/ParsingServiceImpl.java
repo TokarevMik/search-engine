@@ -88,8 +88,10 @@ public class ParsingServiceImpl implements ParsingService {
             }));*/
 //            threadsList.forEach(Thread::start);
         }
-        forkJoinPool.invoke(new ParseNode(tasks));
+        forkJoinPool.invoke(new ParseNode(tasks, pageRepo));
     }
+
+
 
     private List<Site> checkSites() {
         List<Site> sitesList = new ArrayList<>();
@@ -126,12 +128,12 @@ public class ParsingServiceImpl implements ParsingService {
 
     }
 
-  /*  public void stopParsing() {
-        for (Thread p : threadsList) {
+    public void stopParsing() {
+        /*for (Thread p : threadsList) {
             AnchorStop.stop();
             p.interrupt();//проверить убрать
-        }
-    }*/
+        }*/
+    }
 
 //    public boolean isStarted() {
 //        return isStarted;

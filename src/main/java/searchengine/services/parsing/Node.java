@@ -14,6 +14,7 @@ import searchengine.model.Page;
 import searchengine.model.Site;
 import searchengine.repositoryes.PageRepo;
 import searchengine.repositoryes.SiteRepo;
+import searchengine.services.ConnectSiteService;
 
 import java.net.UnknownHostException;
 import java.util.Collection;
@@ -57,10 +58,11 @@ public class Node {
     public void getParseNode() {
         try {
             Thread.sleep(200);
-            Connection.Response response = Jsoup.connect(url).timeout(0).userAgent
+            /*Connection.Response response = Jsoup.connect(url).timeout(0).userAgent
                             ("Mozilla/5.0 (Windows; U; WindowsNT 5.1; en-US; rv1.8.1.6)" +
                                     " Gecko/20070725 Firefox/2.0.0.6")
-                    .referrer("http://www.google.com").maxBodySize(0).execute();
+                    .referrer("http://www.google.com").maxBodySize(0).execute();*/
+            Connection.Response response = new ConnectSiteService(url).getResponse();
             Page page = new Page();
             statusCode = response.statusCode();
             page.setCode(statusCode);
@@ -98,21 +100,19 @@ public class Node {
                     }
                 }
             }
-        }
-        catch (HttpStatusException se) {
+        } catch (HttpStatusException se) {
             path = url.replace(domain, "");
             contentOfPage = "";
             statusCode = se.getStatusCode();
-        }
-        catch (UnknownHostException ignored) {}
-        catch (IllegalArgumentException ignored){}
-        catch (Exception e) {
+        } catch (UnknownHostException | IllegalArgumentException ignored) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
+
     @Transactional
-    private void savePage(Page p){
-        if (pageRepo.findDistinctByPath(p.getPath()).isEmpty()){
+    private void savePage(Page p) {
+        if (pageRepo.findDistinctByPath(p.getPath()).isEmpty()) {
             pageRepo.save(p);
         }
     }

@@ -25,9 +25,15 @@ public class ParseNode extends RecursiveAction {
         this.node = node;
         this.pageRepo = pageRepo;
     }
-    public ParseNode(List<ParseNode>parseNodeList){
+    public ParseNode(List<ParseNode>parseNodeList, PageRepo pageRepo){
+        startParsing(parseNodeList);
 
     }//прописать
+
+    private void startParsing(List<ParseNode> parseNodeList) {
+        ForkJoinTask.invokeAll(parseNodeList);
+    }
+
     @Override
     protected void compute() {
         if (AnchorStop.getStop()) {
