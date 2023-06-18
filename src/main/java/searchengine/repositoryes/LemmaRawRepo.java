@@ -1,10 +1,14 @@
 package searchengine.repositoryes;
 
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
+import searchengine.model.LemmaRaw;
 
-public interface LemmaRawRepo {
+@Repository
+public interface LemmaRawRepo extends JpaRepository<LemmaRaw, Integer> {
     @Modifying
     @Transactional
     @Query(value = "CREATE TABLE IF NOT EXISTS lemma_raw " +
