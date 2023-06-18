@@ -7,19 +7,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import searchengine.dto.statistics.AnchorStop;
+import searchengine.dto.statistics.ParsedPages;
 import searchengine.dto.statistics.SetOfPage;
 import searchengine.model.Site;
 import searchengine.config.SitesList;
 import searchengine.model.Status;
 import searchengine.repositoryes.*;
-import searchengine.services.parsing.NewThreadParser;
 import searchengine.services.parsing.Node;
 import searchengine.services.parsing.ParseNode;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ForkJoinPool;
 
@@ -27,8 +26,6 @@ import java.util.concurrent.ForkJoinPool;
 @Getter
 @RequiredArgsConstructor
 public class ParsingServiceImpl implements ParsingService {
-    //    private static boolean isStarted = false;
-    //    IndexingStatus status;
     @Autowired
     PageRepo pageRepo;
     @Autowired
@@ -40,8 +37,8 @@ public class ParsingServiceImpl implements ParsingService {
     @Autowired
     LemmaRawRepo lemmaRawRepo;
     private final SitesList sites;
-//    private LinkedList<NewThreadParser> parserList = new LinkedList<>();
-//    private LinkedList<Thread> threadsList = new LinkedList<>();
+    private  static SetOfPage setOfPage;
+
     private static ForkJoinPool forkJoinPool;
 //    private final IndexRepo indexRepo;
 
@@ -50,12 +47,10 @@ public class ParsingServiceImpl implements ParsingService {
     public void startParsing() {
         preparationDB();
         recordPages();
-//        IndexingBuilder
-        SetOfPage setOfPage;
-//        isStarted = true;
+        setOfPage = new SetOfPage(); //множество страниц для выгрузки в bd
         AnchorStop.implNewStop();
-//        List<Site> availableSites = checkSites();
         forkJoinPool = new ForkJoinPool();  // определить task
+        ParsedPages.setInit(); // задать список(хранилище) просмотренных страниц
         List<ParseNode> tasks = new ArrayList<>();
 
         for (Site site : checkSites()) {
@@ -95,7 +90,6 @@ public class ParsingServiceImpl implements ParsingService {
 
     private List<Site> checkSites() {
         List<Site> sitesList = new ArrayList<>();
-
         for (Site site : sites.getSites()) {
             int responceCode = 0;
             try {
@@ -129,20 +123,6 @@ public class ParsingServiceImpl implements ParsingService {
     }
 
     public void stopParsing() {
-        /*for (Thread p : threadsList) {
-            AnchorStop.stop();
-            p.interrupt();//проверить убрать
-        }*/
+        AnchorStop.stop();
     }
-
-//    public boolean isStarted() {
-//        return isStarted;
-//    }
-
-//    public boolean isNotShutdown() {
-//        for (NewThreadParser p : parserList) {
-//            if (!p.isShutdown()) return true;
-//        }
-//        return false;
-//    }
 }

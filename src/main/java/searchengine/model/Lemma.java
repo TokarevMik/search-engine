@@ -2,11 +2,9 @@ package searchengine.model;
 
 import jakarta.persistence.*;
 import java.awt.print.Book;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
-
+@Entity
 public class Lemma {
     @Id
     @Column(nullable = false)

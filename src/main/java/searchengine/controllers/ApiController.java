@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import searchengine.dto.statistics.PageIndResponse;
 import searchengine.dto.statistics.SearchResponse;
 import searchengine.dto.statistics.StatisticsResponse;
+import searchengine.repositoryes.SiteRepo;
 import searchengine.services.IndexServiceImpl;
 import searchengine.services.ParsingServiceImpl;
 import searchengine.services.StatisticsService;
@@ -20,11 +21,14 @@ public class ApiController {
     private final StatisticsService statisticsService;
     private final ParsingServiceImpl parsingService;
     private final IndexServiceImpl indexService ;
+    private final SiteRepo siteRepo;
 
-    public ApiController(StatisticsService statisticsService, ParsingServiceImpl parsingService, IndexServiceImpl indexService) {
+    public ApiController(StatisticsService statisticsService, ParsingServiceImpl parsingService, IndexServiceImpl indexService,
+                         SiteRepo siteRepo) {
         this.statisticsService = statisticsService;
         this.parsingService = parsingService;
         this.indexService = indexService;
+        this.siteRepo = siteRepo;
     }
 
     @GetMapping("/statistics")
@@ -35,21 +39,20 @@ public class ApiController {
     @GetMapping("/startIndexing")
     public Map<String, String> StartSearching() {
         Map<String, String> response = new HashMap<>();
-        if (!parsingService.isStarted()) {
+        if (siteRepo.countOfIndexing()==0) {
             parsingService.startParsing();
             response.put("result", "true");
         } else {
             response.put("result", "false");
             response.put("error", "Индексация уже запущена");
         }
-        ;
         return response;
     }
 
     @GetMapping("/stopIndexing")
     public Map<String, String> StopSearching() {
         Map<String, String> response = new HashMap<>();
-        if (parsingService.isNotShutdown()) {
+        if (siteRepo.countOfIndexing()!=0) {
             response.put("result", "true");
             parsingService.stopParsing();
         } else {

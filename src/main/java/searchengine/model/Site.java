@@ -20,7 +20,7 @@ public class Site {
     int id;
     @Enumerated(EnumType.STRING)
     @Column(columnDefinition = "ENUM('INDEXING', 'INDEXED', 'FAILED')",nullable = false)
-    private  Status status = Status.FAILED;
+    private  Status status = Status.INDEXING;
     private Date status_time;
     @Column(columnDefinition="TEXT")
     private String last_error;

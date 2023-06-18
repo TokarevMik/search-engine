@@ -35,9 +35,11 @@ public class Node {
     String bodyText = "";
     private Integer statusCode;
     private String contentOfPage = "";
+    Page page;
 
     public Node(String url) {
         this.url = url;
+        page = new Page();
     }
 
     @Autowired
@@ -47,6 +49,7 @@ public class Node {
         this.site = site;
         this.pageRepo = pageRepo;
         this.siteRepo = siteRepo;
+        page = new Page();
     }
 
     private Collection<Node> nodes = new HashSet<>();
@@ -63,7 +66,6 @@ public class Node {
                                     " Gecko/20070725 Firefox/2.0.0.6")
                     .referrer("http://www.google.com").maxBodySize(0).execute();*/
             Connection.Response response = new ConnectSiteService(url).getResponse();
-            Page page = new Page();
             statusCode = response.statusCode();
             page.setCode(statusCode);
             Document doc = response.parse();
@@ -82,7 +84,7 @@ public class Node {
             }
             page.setPath(path);
             page.setSite(site);
-            savePage(page);
+            //savePage(page); //переписать на сохранение в PageSet
             for (Element link : links) {
                 String linkHref = link.attr("abs:href");
                 if (!linkHref.contains("tel:") && !linkHref.contains("callto:")) {
