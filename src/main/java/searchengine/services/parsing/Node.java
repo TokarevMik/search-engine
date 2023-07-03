@@ -4,7 +4,6 @@ import lombok.Getter;
 import lombok.Setter;
 import org.jsoup.Connection;
 import org.jsoup.HttpStatusException;
-import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
@@ -61,10 +60,6 @@ public class Node {
     public void getParseNode() {
         try {
             Thread.sleep(200);
-            /*Connection.Response response = Jsoup.connect(url).timeout(0).userAgent
-                            ("Mozilla/5.0 (Windows; U; WindowsNT 5.1; en-US; rv1.8.1.6)" +
-                                    " Gecko/20070725 Firefox/2.0.0.6")
-                    .referrer("http://www.google.com").maxBodySize(0).execute();*/
             Connection.Response response = new ConnectSiteService(url).getResponse();
             statusCode = response.statusCode();
             page.setCode(statusCode);
@@ -73,7 +68,6 @@ public class Node {
             Element content = doc.body();
             bodyText = content.text(); //
             page.setContent(contentOfPage);
-//            Elements links = content.getElementsByTag("a");
             Elements links = content.select("a[href]");
             if (url.equals(domain)) {
                 path = domain;
@@ -84,12 +78,10 @@ public class Node {
             }
             page.setPath(path);
             page.setSite(site);
-            //savePage(page); //переписать на сохранение в PageSet
             for (Element link : links) {
                 String linkHref = link.attr("abs:href");
                 if (!linkHref.contains("tel:") && !linkHref.contains("callto:")) {
                     if (!linkHref.contains("http")) {
-//                    if (!linkHref.contains("http")&&!linkHref.contains("https")) {
                         linkHref = domain.concat(linkHref);
                         nodes.add(new Node(linkHref, domain, site, pageRepo, siteRepo));
                     }

@@ -16,7 +16,6 @@ public class Page {
     @Column(nullable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
-    @Column(columnDefinition = "TEXT", nullable = false, unique = true)
     private String path;
     @Column(nullable = false)
     private int code;

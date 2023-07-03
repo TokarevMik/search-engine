@@ -12,8 +12,10 @@ import java.util.List;
 @Repository
 public interface PageRepo extends CrudRepository<Page,Integer> {
     List<Page> findDistinctByPath(String path);
-    @Override
-    void deleteAll();
+    @Transactional
+    @Modifying
+    @Query(value = "DROP TABLE IF EXISTS page", nativeQuery = true)
+    void deletePageTableIfExists();
     @Modifying
     @Transactional
     @Query(value = "CREATE TABLE IF NOT EXISTS page " +

@@ -15,6 +15,7 @@ import searchengine.model.Status;
 import searchengine.repositoryes.*;
 import searchengine.services.parsing.Node;
 import searchengine.services.parsing.ParseNode;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -25,6 +26,7 @@ import java.util.concurrent.ForkJoinPool;
 @Service
 @Getter
 @RequiredArgsConstructor
+@Slf4j
 public class ParsingServiceImpl implements ParsingService {
     @Autowired
     PageRepo pageRepo;
@@ -37,8 +39,7 @@ public class ParsingServiceImpl implements ParsingService {
     @Autowired
     LemmaRawRepo lemmaRawRepo;
     private final SitesList sites;
-    private  static SetOfPage setOfPage;
-
+    private static SetOfPage setOfPage;
     private static ForkJoinPool forkJoinPool;
 //    private final IndexRepo indexRepo;
 
@@ -46,46 +47,28 @@ public class ParsingServiceImpl implements ParsingService {
     @Async
     public void startParsing() {
         preparationDB();
-        recordPages();
         setOfPage = new SetOfPage(); //множество страниц для выгрузки в bd
         AnchorStop.implNewStop();
         forkJoinPool = new ForkJoinPool();  // определить task
         ParsedPages.setInit(); // задать список(хранилище) просмотренных страниц
         List<ParseNode> tasks = new ArrayList<>();
-
         for (Site site : checkSites()) {
             site.setStatus_time(new Date());
             site.setStatus(Status.INDEXING);
             siteRepo.save(site);
             Node node = new Node(site.getUrl(), site.getUrl(),
                     site, pageRepo, siteRepo);
+            if(node==null){
+                log.error("NullPointerException: The 'node2' parameter must not be empty. URL: {}", node);
+            }
             tasks.add(new ParseNode(node, pageRepo));
-
-            /*threadsList.add(new Thread(() -> {
-                Node node = new Node(site.getUrl(), site.getUrl(),
-                        site, pageRepo, siteRepo);
-                ForkJoinPool pool = ForkJoinPool.commonPool();
-                ParseNode task = new ParseNode(node, pageRepo);
-                pool.execute(task);
-                Thread.currentThread().setName(site.getName());
-                while (Thread.currentThread().isAlive() && pool.getActiveThreadCount() > 0) {
-                    if (Thread.currentThread().isInterrupted()) {
-                        pool.shutdownNow();
-                        break;
-
-                    }
-                }
-                if (!Thread.currentThread().isInterrupted()) {
-                    site.setStatus(Status.INDEXED);
-                    site.setStatus_time(new Date());
-//                    siteRepo.changeStatus(site.getId(), site.getStatus(), site.getStatus_time()); //Установка статуса сайта
-                }
-            }));*/
-//            threadsList.forEach(Thread::start);
         }
         forkJoinPool.invoke(new ParseNode(tasks, pageRepo));
+        if(setOfPage.getCount()>0){
+            pageRepo.saveAll(setOfPage.getRecords());
+            setOfPage.newRecords();
+        }
     }
-
 
 
     private List<Site> checkSites() {
@@ -103,6 +86,11 @@ public class ParsingServiceImpl implements ParsingService {
             } catch (IOException ex) {
                 siteRepo.changeStatus(site.getUrl(), Status.FAILED, site.getStatus_time(), "Ошибка индексации: главная страница сайта не доступна");
             }
+            catch (NullPointerException en){
+                log.error("NullPointerException: The 'null' parameter must not be empty. URL: {}", site.getUrl());
+                log.error("responceCode: code: {}", responceCode);
+                log.error("Site length: {}", sites.getSites().size());
+            }
         }
         return sitesList;
     }
@@ -111,18 +99,18 @@ public class ParsingServiceImpl implements ParsingService {
         siteRepo.deleteAll();
         siteRepo.resetAutoIncrement();
         siteRepo.dropTables();
+        pageRepo.deletePageTableIfExists();
         pageRepo.createTablePage();
         lemmaRepo.createTableLemma();
         indexRepo.createTableIndex();
         lemmaRawRepo.createTableLemmaRaw();
-
     }
 
-    private static void recordPages() {
-
-    }
 
     public void stopParsing() {
         AnchorStop.stop();
+    }
+    public static SetOfPage getSetOfPage() {
+        return setOfPage;
     }
 }

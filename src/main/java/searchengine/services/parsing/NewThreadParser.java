@@ -4,7 +4,7 @@ import searchengine.repositoryes.PageRepo;
 
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.atomic.AtomicBoolean;
-
+//TODO - проверить использование класса и удалитьесли не используется
 public class NewThreadParser implements Runnable {
     private final AtomicBoolean isRunning = new AtomicBoolean(false);
 
