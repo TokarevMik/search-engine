@@ -9,12 +9,12 @@ import searchengine.model.Site;
 import searchengine.model.Status;
 
 import java.util.Date;
-import java.util.List;
 
 @Repository
-public interface SiteRepo extends JpaRepository<Site,Integer> {
+public interface SiteRepo extends JpaRepository<Site, Integer> {
     @Override
     void deleteAll();
+
     @Modifying
 //    @Query("UPDATE Site s SET s.status = :status, s.status_time = :status_time, last_error = ?4  WHERE s.url = :url")
     @Query("UPDATE Site s SET s.status =?2, s.status_time = ?3, last_error = ?4  WHERE s.url = ?1")
@@ -27,10 +27,12 @@ public interface SiteRepo extends JpaRepository<Site,Integer> {
     @Query(value = "ALTER TABLE site AUTO_INCREMENT = 1"
             , nativeQuery = true)
     int resetAutoIncrement();
+
     @Modifying
     @Transactional
     @Query(value = "DROP TABLE IF EXISTS page, `index`, lemma, lemma_raw", nativeQuery = true)
     int dropTables();
+
     @Query(value = "SELECT COUNT(*) FROM site s WHERE s.status = 'INDEXING'"
             , nativeQuery = true)
     int countOfIndexing();

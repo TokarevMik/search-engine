@@ -25,7 +25,7 @@ public class ParseNode extends RecursiveAction {
     @Autowired
     private PageRepo pageRepo;
     private Node node;
-    private SetOfPage currentSetOfPage;
+    private static SetOfPage currentSetOfPage;
 
     public Node getNode() {
         return node;
@@ -36,12 +36,6 @@ public class ParseNode extends RecursiveAction {
         this.pageRepo = pageRepo;
         currentSetOfPage = ParsingServiceImpl.getSetOfPage();
     }
-
-    public ParseNode(List<ParseNode> parseNodeList, PageRepo pageRepo) {
-        startParsing(parseNodeList);
-        currentSetOfPage = ParsingServiceImpl.getSetOfPage();
-
-    }//прописать
 
     private void startParsing(List<ParseNode> parseNodeList) {
         ForkJoinTask.invokeAll(parseNodeList);
@@ -57,19 +51,18 @@ public class ParseNode extends RecursiveAction {
                 pool.shutdownNow();
             }
         } else {
-            try {
-                node.getParseNode(); //составление списка дочерних ссылок
-            } catch (Exception e) {
-                log.error("NullPointerException: The 'node' parameter must not be empty. URL: {}", node);
-                e.printStackTrace();
-            }
+            node.getParseNode(); //составление списка дочерних ссылок
             Set<ParseNode> taskList = new CopyOnWriteArraySet<>();
-
+            if(!ParsedPages.contain(node.getPath())){
+                ParsedPages.addPage(node.getPath());
+            }
+            WritePage(node.getPage());
             for (Node child : node.getChildren()) { //вызврат списка дочерних ссылок
-                 if (!ParsedPages.contain(child.getPath())) {  //проверка есть ли запись в бд
+                //TODO child's path can't be null
+                if (!ParsedPages.contain(child.getPath())) {  //проверка есть ли запись в бд
                     ParseNode parseNodeTask = new ParseNode(child, pageRepo); //06.06
-                    ParsedPages.addPage(child.getPath()); //добавить логику записи в бд (сейчас в node)
-                    WritePage(node.getPage());
+                    ParsedPages.addPage(child.getPath()); //
+//                    WritePage(node.getPage()); //
                     parseNodeTask.fork();
                     try {
                         Thread.sleep(300);
@@ -89,11 +82,19 @@ public class ParseNode extends RecursiveAction {
         }
     } //end of compute
 
-    private void WritePage(Page page) {
-        if (currentSetOfPage.getCount() < 300) {
+    private void WritePage(Page page) { //предполагаемая запись в бд
+        if (currentSetOfPage.getCount() < 30) {
             currentSetOfPage.addPage(page);
         } else {
-            pageRepo.saveAll(currentSetOfPage.getRecords());
+            System.out.println("save pages"); //удалить
+            try {
+                Set<Page> pageSet = currentSetOfPage.getRecords();
+                pageRepo.saveAll(pageSet);
+//                pageRepo.saveAll(currentSetOfPage.getRecords());
+            } catch (Exception e){
+                System.out.println("Page's path - " + page.getPath());
+                System.out.println("Page's content - " + page.getContent().substring(0,15));
+            }
         }
 
     }

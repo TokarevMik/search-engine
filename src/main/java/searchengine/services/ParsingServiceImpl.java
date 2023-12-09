@@ -21,6 +21,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.ForkJoinPool;
 
 @Service
@@ -41,6 +43,7 @@ public class ParsingServiceImpl implements ParsingService {
     private final SitesList sites;
     private static SetOfPage setOfPage;
     private static ForkJoinPool forkJoinPool;
+    ExecutorService executorService;
 //    private final IndexRepo indexRepo;
 
     @Override
@@ -49,21 +52,24 @@ public class ParsingServiceImpl implements ParsingService {
         preparationDB();
         setOfPage = new SetOfPage(); //множество страниц для выгрузки в bd
         AnchorStop.implNewStop();
-        forkJoinPool = new ForkJoinPool();  // определить task
         ParsedPages.setInit(); // задать список(хранилище) просмотренных страниц
-        List<ParseNode> tasks = new ArrayList<>();
-        for (Site site : checkSites()) {
+        List<Site> checkedSites = checkSites(); //список просмотренных сайтов
+        executorService = Executors.newFixedThreadPool(checkedSites.size());
+        for (Site site : checkedSites) {
             site.setStatus_time(new Date());
             site.setStatus(Status.INDEXING);
             siteRepo.save(site);
+
             Node node = new Node(site.getUrl(), site.getUrl(),
                     site, pageRepo, siteRepo);
-            if(node==null){
-                log.error("NullPointerException: The 'node2' parameter must not be empty. URL: {}", node);
-            }
-            tasks.add(new ParseNode(node, pageRepo));
+            Thread thread = new Thread(()->{
+                ForkJoinPool forkJoinPool = new ForkJoinPool();
+                forkJoinPool.invoke(new ParseNode(node, pageRepo));
+            });
+
+            executorService.execute(thread);
         }
-        forkJoinPool.invoke(new ParseNode(tasks, pageRepo));
+        executorService.shutdown();
         if(setOfPage.getCount()>0){
             pageRepo.saveAll(setOfPage.getRecords());
             setOfPage.newRecords();
@@ -109,6 +115,7 @@ public class ParsingServiceImpl implements ParsingService {
 
     public void stopParsing() {
         AnchorStop.stop();
+        executorService.shutdownNow();
     }
     public static SetOfPage getSetOfPage() {
         return setOfPage;

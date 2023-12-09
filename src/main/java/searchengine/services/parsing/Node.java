@@ -2,6 +2,7 @@ package searchengine.services.parsing;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Connection;
 import org.jsoup.HttpStatusException;
 import org.jsoup.nodes.Document;
@@ -18,8 +19,6 @@ import searchengine.services.ConnectSiteService;
 import java.net.UnknownHostException;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 @Getter
 @Setter
@@ -50,6 +49,16 @@ public class Node {
         this.siteRepo = siteRepo;
         page = new Page();
     }
+    @Autowired
+    public Node(String url, String domain, Site site, PageRepo pageRepo, SiteRepo siteRepo,String path) {
+        this.url = url;
+        Node.domain = domain;
+        this.site = site;
+        this.pageRepo = pageRepo;
+        this.siteRepo = siteRepo;
+        this.path = path;
+        page = new Page();
+    }
 
     private Collection<Node> nodes = new HashSet<>();
 
@@ -64,23 +73,26 @@ public class Node {
             statusCode = response.statusCode();
             page.setCode(statusCode);
             Document doc = response.parse();
-            contentOfPage = doc.html();//содержимое страницы
+            contentOfPage = doc.html();//содержимое body (ссылки)
             Element content = doc.body();
-            bodyText = content.text(); //
+            bodyText = content.text(); //текстовое содержимое
             page.setContent(contentOfPage);
             Elements links = content.select("a[href]");
-            if (url.equals(domain)) {
-                path = domain;
-            } else {
-                if (url.contains(domain)) {
-                    path = url.replace(domain, "");
-                }
-            }
-            page.setPath(path);
+            //TODO проверить заполнение path
+            page.setPath(checkPath(url,domain));
             page.setSite(site);
             for (Element link : links) {
                 String linkHref = link.attr("abs:href");
-                if (!linkHref.contains("tel:") && !linkHref.contains("callto:")) {
+                if (linkCheck(linkHref)) {
+                    if (!checkDomain(linkHref, domain)) linkHref = domain.concat(linkHref);
+                    String childPath = checkPath(linkHref,domain);
+                    if(childPath==null) System.out.println("Null path !!!!" +linkHref );
+                    if(page.getPath()==null){
+                        System.out.println("2) Null path !!!! - " +linkHref);}
+                    nodes.add(new Node(linkHref, domain, site, pageRepo, siteRepo, childPath));   // добавление дочерней ссылки в список , но уровнем не ниже 1 от родительской
+                }
+                ////////
+                /*if (!linkHref.contains("tel:") && !linkHref.contains("callto:")) {
                     if (!linkHref.contains("http")) {
                         linkHref = domain.concat(linkHref);
                         nodes.add(new Node(linkHref, domain, site, pageRepo, siteRepo));
@@ -92,7 +104,7 @@ public class Node {
                             nodes.add(new Node(linkHref, domain, site, pageRepo, siteRepo));
                         }
                     }
-                }
+                }*/
             }
         } catch (HttpStatusException se) {
             path = url.replace(domain, "");
@@ -103,6 +115,43 @@ public class Node {
             e.printStackTrace();
         }
     }
+
+    private boolean linkCheck(String linkHref) {
+        if (checkDomain(linkHref, domain)) {
+            return forbiddenSymbol(linkHref);
+        } if (linkHref.startsWith("/")) {
+            return forbiddenSymbol(linkHref);
+        } else
+            return false; //если нет домена и ссылка не локальная - выход
+    }
+    private String checkPath(String url, String domain){
+        String path = null;
+        if (url.equals(domain)) {
+            path = domain;
+        } else {
+            if (checkDomain(url, domain)) {
+                path = url.replaceFirst("[\\w]+://[\\w\\.]+", "");
+            }
+        }
+        return path;
+    }
+
+    private boolean checkDomain(String url, String domain) {
+        return url.contains(domain) || url.contains(domain.substring(12)); //проверка наличия домена в ссылке с www и без
+    }
+
+    boolean forbiddenSymbol(String linkHref) {
+        for (String fbSym : EXTENSIONS_LIST) {
+            if (linkHref.contains(fbSym)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private static final String[] EXTENSIONS_LIST = {"redirect", "php", "js",
+            "#", ".jpg", ".jpeg", ".png", ".gif", ".pdf",
+            ".php", "mailto:", "resolve?", "go?", "callto", "tel:"};
 
     @Transactional
     private void savePage(Page p) {
